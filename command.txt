@@ -1,1 +1,7 @@
 ansible-playbook main-remote.yml -i inventory --private-key UdacityProjectKey.pem
+
+
+~/Documents/Coding_Projects/CICD/AWS_Keypairs/UdacityProjectKey.pem
+
+
+ansible-playbook main-remote.yml -i inventory --private-key ~/Documents/Coding_Projects/CICD/AWS_Keypairs/UdacityProjectKey.pem
