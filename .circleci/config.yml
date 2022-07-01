@@ -49,9 +49,42 @@ jobs:
           command:  return 1
       - destroy-environment
 
+  create-and-deploy-front-end:
+    docker:
+     - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Execute bucket.yml - Create Cloudformation Stack
+          command: |
+            aws cloudformation deploy \
+            --template-file bucket.yml \
+            --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter-overrides MyBucketName="my-udaproj-bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: aws s3 sync . s3://my-udaproj-bucket-${CIRCLE_WORKFLOW_ID:0:7} --delete
+
+  get-last-deployment-id:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - run:
+          name: Fetch and save the old pipeline ID (bucket name) responsible for the last release.
+          command: |
+            aws cloudformation \
+            list-exports --query "Exports[?Name==\`PipelineID\`].Value" \
+            --no-paginate --output text > ~/textfile.txt
+      - persist-to-workspace:
+          root: ~/
+          paths: 
+            - textfile.txt 
+
 workflows:
   myWorkflow:
     jobs:
       - myjob1
       - create-infrastructure
       - smoke-test
+      - create-and-deploy-front-end
+      - get-last-deployment-id

@@ -5,3 +5,10 @@ ansible-playbook main-remote.yml -i inventory --private-key UdacityProjectKey.pe
 
 
 ansible-playbook main-remote.yml -i inventory --private-key ~/Documents/Coding_Projects/CICD/AWS_Keypairs/UdacityProjectKey.pem
+
+
+aws cloudformation deploy \
+--template-file cloudfront.yml \
+--stack-name production-distro \
+--parameter-overrides PipelineID="my-udaproj-bucket" \ # Name of the S3 bucket you created manually.
+--tags project=udapeople &
