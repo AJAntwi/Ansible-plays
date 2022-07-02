@@ -17,15 +17,6 @@ commands:
             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
-  myjob1:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: echo "Hello, World!"
-
   create-infrastructure:
     docker:
       - image: amazon/aws-cli
