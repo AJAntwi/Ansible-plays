@@ -38,16 +38,26 @@ jobs:
               --template-file CFtemplate.yml \
               --stack-name myCICDStack-${CIRCLE_WORKFLOW_ID:0:5} \
               --region us-east-1
+      - run: return 1
+      - destroy_environment
 
-  smoke-test:
+  smoke_test:
     docker:
       - image: alpine:latest
     steps:
+      - run: apk add --update curl
       - run:
-          name: Test job
-        # Fail the job intentionally to simulate an error.
-          command:  return 1
-      - destroy-environment
+          name: smoke test
+          command: |
+            URL="https://blog.udacity.com/"
+            # Test if website exists
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
+      - destroy_environment
 
   create-and-deploy-front-end:
     docker:
@@ -61,7 +71,7 @@ jobs:
             --template-file bucket.yml \
             --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7} \
             --parameter-overrides MyBucketName="mybucket92-${CIRCLE_WORKFLOW_ID:0:7}"
-      - run: aws s3 sync . s3://my-udaproj-bucket-${CIRCLE_WORKFLOW_ID:0:7} --delete
+      - run: aws s3 sync . s3://mybucket92-${CIRCLE_WORKFLOW_ID:0:7} --delete
 
   get-last-deployment-id:
     docker:
@@ -108,9 +118,9 @@ jobs:
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
             aws s3 rm "s3://${OldBucketID}" --recursive
-          #  aws cloudformation delete-stack --stack-name production-distro 
-          #  aws cloudformation delete-stack --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7}
-          #  aws cloudformation delete-stack --stack-name myCICDStack-${CIRCLE_WORKFLOW_ID:0:5}
+            aws cloudformation delete-stack --stack-name production-distro 
+            aws cloudformation delete-stack --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name myCICDStack-${CIRCLE_WORKFLOW_ID:0:5}
 
 workflows:
   myWorkflow:
