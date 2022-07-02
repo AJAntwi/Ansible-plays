@@ -80,7 +80,7 @@ jobs:
           paths: 
             - textfile.txt 
 
-  promote_to_production:
+  promote-to-production:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -116,8 +116,12 @@ workflows:
   myWorkflow:
     jobs:
       - create-and-deploy-front-end
-      - myjob1
-      - create-infrastructure
-      - smoke-test
-      
+      - promote-to-production:
+          requires: 
+            - create-and-deploy-front-end
       - get-last-deployment-id
+      - clean-up-old-front-end:
+          requires: 
+            - get-last-deployment-id
+            - promote-to-production
+    
